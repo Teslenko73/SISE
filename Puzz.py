@@ -1,5 +1,6 @@
 from random import choice
 import numpy as np
+import os
 class Puzz:
     UP = (1,0)
     DOWN = (-1,0)
@@ -57,6 +58,10 @@ class Puzz:
         return True
 
     def WriteInFile(self, filename):
+        folder = os.path.dirname(filename)
+
+        if folder and not os.path.exists(folder):
+            os.makedirs(folder)
         with open(filename, 'w') as file:
             file.write(f"{self.board_rows} {self.board_columns}\n")
 

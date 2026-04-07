@@ -34,7 +34,7 @@ def gameLoop():
     clock = pygame.time.Clock()
 
     puzzle = Puzz.Puzz(row,column)
-    puzzle.loadFromFile("generPuzz.txt")
+    puzzle.loadFromFile("bin/generPuzz.txt")
     while True:
         # for event in pygame.event.get():
         #     handleInput(event, puzzle)
