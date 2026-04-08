@@ -47,7 +47,7 @@ class Puzz:
         self.board[self.blankPos[0]][self.blankPos[1]] = self.board[new_x][new_y]
         self.board[new_x][new_y] = 0
         self.blankPos = (new_x, new_y)
-        self.WriteInFile("bin/generPuzz.txt")
+        self.WriteInFile("generPuzz.txt")
         return True
 
     def checkWin(self):
