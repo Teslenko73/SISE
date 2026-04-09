@@ -2,12 +2,15 @@ import solver
 import random
 import csv
 import time
+import Puzz
 
-GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0)
-ROWS, COLS = 4, 4
+row = int(input("Press Rows: "))
+column = int(input("Press Columns: "))
+puzzle = Puzz.Puzz(row,column)
+GOAL = puzzle.get_board()
+ROWS, COLS = row, column
 ORDER = "RDLU"
 PLIK = "RDLU.csv"
-
 
 def scramble_board(goal, steps):
     board = list(goal)
@@ -28,14 +31,18 @@ def scramble_board(goal, steps):
 print("Trwają operacje, czekaj od 50 sekund do 1 godziny...")
 
 with open(PLIK, 'w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file, delimiter=',')
+    writer = csv.writer(file, delimiter=';')
     writer.writerow(
         ['Algorytm', 'Poziom_trudnosci', 'Czas_ms', 'Odwiedzone_stany', 'Przetworzone_stany', 'Max_glebokosc'])
 
     for depth in range(1, 8):
         for _ in range(59):
             test_board = scramble_board(GOAL, depth)
-
+            print(f"Testowa plansza (trudność {depth}):")
+            for i in range(ROWS):
+                start = i * COLS
+                end = start + COLS
+                print(test_board[start:end])
             # 1. BFS
             start_t = time.perf_counter()
             res, v, p, d = solver.solve_bfs(test_board, ROWS, COLS, ORDER)
@@ -60,3 +67,4 @@ with open(PLIK, 'w', newline='', encoding='utf-8') as file:
             writer.writerow(['A* (Hamm)', depth, round(t_ms, 3), v, p, d])
 
 print(f'Patrz na "{ORDER}".csv plik')
+
