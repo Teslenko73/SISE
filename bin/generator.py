@@ -5,7 +5,8 @@ import time
 
 GOAL = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0)
 ROWS, COLS = 4, 4
-ORDER = "RDUL"
+ORDER = "RDLU"
+PLIK = "RDLU.csv"
 
 
 def scramble_board(goal, steps):
@@ -24,15 +25,15 @@ def scramble_board(goal, steps):
     return tuple(board)
 
 
-print("Trwają operacje, czekaj od 20 sekund do 10 minut")
+print("Trwają operacje, czekaj od 50 sekund do 1 godziny...")
 
-with open('RDUL.csv', 'w', newline='') as file:
-    writer = csv.writer(file, delimiter=';')
+with open(PLIK, 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file, delimiter=',')
     writer.writerow(
         ['Algorytm', 'Poziom_trudnosci', 'Czas_ms', 'Odwiedzone_stany', 'Przetworzone_stany', 'Max_glebokosc'])
 
     for depth in range(1, 8):
-        for _ in range(5):
+        for _ in range(59):
             test_board = scramble_board(GOAL, depth)
 
             # 1. BFS
@@ -53,4 +54,9 @@ with open('RDUL.csv', 'w', newline='') as file:
             t_ms = (time.perf_counter() - start_t) * 1000.0
             writer.writerow(['A* (Manh)', depth, round(t_ms, 3), v, p, d])
 
-print("Patrz na csv plik")
+            start_t = time.perf_counter()
+            res, v, p, d = solver.solve_astar(test_board, ROWS, COLS, "hamm")
+            t_ms = (time.perf_counter() - start_t) * 1000.0
+            writer.writerow(['A* (Hamm)', depth, round(t_ms, 3), v, p, d])
+
+print(f'Patrz na "{ORDER}".csv plik')
