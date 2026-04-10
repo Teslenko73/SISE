@@ -10,7 +10,7 @@ puzzle = Puzz.Puzz(row,column)
 GOAL = puzzle.get_board()
 ROWS, COLS = row, column
 ORDER = "RDLU"
-PLIK = ".csv"
+PLIK = f"{ORDER}.csv"
 
 def scramble_board(goal, steps):
     board = list(goal)
@@ -31,7 +31,7 @@ def scramble_board(goal, steps):
 print("Trwają operacje, czekaj od 50 sekund do 1 godziny...")
 
 with open(PLIK, 'w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file, delimiter=';')
+    writer = csv.writer(file, delimiter=',')
     writer.writerow(
         ['Algorytm', 'Poziom_trudnosci', 'Czas_ms', 'Odwiedzone_stany', 'Przetworzone_stany', 'Max_glebokosc'])
 
