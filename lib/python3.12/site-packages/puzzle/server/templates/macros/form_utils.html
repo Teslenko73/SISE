@@ -1,0 +1,26 @@
+{% macro select_input(name, items, selected=None, multiple=False, required=False) %}
+  <select class="selectpicker form-control"
+          name="{{ name }}"
+          {% if multiple %}multiple{% endif %}
+          {% if required %}required{% endif %}>
+    {% if not multiple %}
+      <option disabled selected value> -- select an option -- </option>
+    {% endif %}
+    {% for item in items %}
+      {% if item|islist %}
+        {% set name, item = item %}
+      {% else %}
+        {% set name = item %}
+        {% set item = item %}
+      {% endif %}
+
+      {% if multiple and item in selected %}
+        <option value="{{ item }}" selected>{{ name }}</option>
+      {% elif not multiple and item == selected %}
+        <option value="{{ item }}" selected>{{ name }}</option>
+      {% else %}
+        <option value="{{ item }}">{{ name }}</option>
+      {% endif %}
+    {% endfor %}
+  </select>
+{% endmacro %}

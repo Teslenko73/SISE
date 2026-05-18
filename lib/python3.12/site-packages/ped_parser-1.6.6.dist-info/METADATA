@@ -1,0 +1,21 @@
+Metadata-Version: 2.0
+Name: ped-parser
+Version: 1.6.6
+Summary: A ped file parser.
+Home-page: https://github.com/moonso/ped_parser
+Author: Mans Magnusson
+Author-email: mans.magnusson@scilifelab.se
+License: MIT License
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Intended Audience :: Science/Research
+Requires-Dist: click
+Requires-Dist: pytest
+
+Parse pedigree files in different formats
+
+

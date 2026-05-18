@@ -1,0 +1,3 @@
+[console_scripts]
+phizz = phizz.__main__:cli
+

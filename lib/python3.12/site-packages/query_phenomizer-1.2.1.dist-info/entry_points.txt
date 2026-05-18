@@ -1,0 +1,2 @@
+[console_scripts]
+query_phenomizer = query_phenomizer.__main__:cli

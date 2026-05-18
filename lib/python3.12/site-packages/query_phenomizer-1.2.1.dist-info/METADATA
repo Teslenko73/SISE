@@ -1,0 +1,58 @@
+Metadata-Version: 2.1
+Name: query-phenomizer
+Version: 1.2.1
+Summary: Tool for query and parsing the phenomizer tool
+Home-page: https://www.github.com/moonso/query_phenomizer
+Author: Måns Magnusson
+Author-email: mans.magnusson@scilifelab.se
+License: Modified BSD
+Keywords: hpo development phenomizer
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Environment :: Console
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: click
+Requires-Dist: requests
+Requires-Dist: pytest
+
+[![Build Status](https://travis-ci.org/moonso/query_phenomizer.svg)](https://travis-ci.org/moonso/query_phenomizer)
+# query_phenomizer #
+
+A small module for querying the [phenomizer tool](http://compbio.charite.de/phenomizer/) with HPO-terms.
+
+# INFO!!! #
+
+From 16/2-16 phenomizer demands a password and username when using the service in this way.
+Request login credentials from sebastian.koehler@charite.de
+
+## Installation ##
+
+    pip install query_phenomizer
+
+or
+```
+git clone https://github.com/moonso/query_phenomizer.git
+cd query_phenomizer
+pip install --editable .
+```
+##Usage##
+
+    query_phenomizer HP:0001623 HP:0002465 --output phenitypes.txt
+
+User can check if hpo terms exist by using the flag ```-c/--check_terms```.
+
+    query_phenomizer HP:0001623 HP:02345555 --check_terms -v
+
+Prints that HP:02345555 does not exist.
+
+For more info run
+
+    query_phenomizer --help
