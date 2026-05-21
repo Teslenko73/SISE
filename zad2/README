@@ -1,0 +1,199 @@
+тобі потрібно тільки UBW.py i дерикторія wyniki
+файли були створені для перевірки головного праграму
+
+
+# Korekcja pomiarów UWB – Sieć Neuronowa
+
+## Opis projektu
+
+Program koryguje błędy systemu lokalizacji UWB (Ultra-Wideband) przy użyciu sieci neuronowej zaimplementowanej w NumPy (bez zewnętrznych frameworków ML). Sieć uczy się systematycznego błędu pozycjonowania na danych statycznych i stosuje korekcję na danych dynamicznych.
+
+---
+
+## Wymagania
+
+```
+Python >= 3.8
+numpy
+pandas
+matplotlib
+scikit-learn
+openpyxl
+```
+
+Instalacja:
+```bash
+pip install numpy pandas matplotlib scikit-learn openpyxl
+```
+
+---
+
+## Struktura katalogów
+
+```
+projekt/
+├── uwb.py          # główny skrypt
+├── pomiary/
+│   ├── F8/
+│   │   ├── f8_stat_1.xlsx      # dane statyczne (trening)
+│   │   ├── f8_stat_2.xlsx
+│   │   ├── ...
+│   │   ├── f8_1p.xlsx          # dane dynamiczne (test)
+│   │   ├── f8_1z.xlsx
+│   │   └── f8_random_1p.xlsx
+│   └── F10/
+│       ├── f10_stat_1.xlsx
+│       ├── ...
+│       └── f10_1p.xlsx
+└── wyniki/                     # generowane automatycznie
+    ├── F8/
+    │   ├── cdf_comparison.png
+    │   ├── trajectory_no_outlier.png
+    │   ├── trajectory_with_outlier.png
+    │   ├── error_vs_time.png
+    │   ├── training_curve_no_outlier.png
+    │   ├── training_curve_with_outlier.png
+    │   ├── wagi_F8.xlsx
+    │   ├── wyniki_F8.xlsx
+    │   └── dystrybuanta_NN_F8.xlsx
+    ├── F10/
+    │   └── ... (analogicznie)
+    └── cdf_comparison_all.png
+```
+
+## Architektura sieci neuronowej
+
+```
+Wejście: n_features neuronów
+    ↓
+Warstwa 1: 256 neuronów, ReLU, Dropout(0.1)
+    ↓
+Warstwa 2: 128 neuronów, ReLU, Dropout(0.1)
+    ↓
+Warstwa 3:  64 neurony,  ReLU, Dropout(0.1)
+    ↓
+Warstwa 4:  32 neurony,  ReLU, Dropout(0.1)
+    ↓
+Wyjście:     2 neurony,  liniowa  →  [Δx, Δy]
+```
+
+### Cechy wejściowe (na próbkę)
+
+Dla każdej próbki budowane jest okno czasowe `seq_len=10` poprzednich pomiarów:
+
+| Grupa cech | Rozmiar |
+|---|---|
+| Sygnały UWB (stabilne cechy × 10) | `n_stable × 10` |
+| Pozycje cx, cy w oknie | `2 × 10 = 20` |
+| Prędkości vx, vy w oknie | `2 × 10 = 20` |
+| Przyspieszenia ax, ay w oknie | `2 × 10 = 20` |
+
+### Target (wartość przewidywana)
+
+Sieć przewiduje **deltę błędu**:
+```
+target = [rx - cx,  ry - cy]
+```
+Wynik korekcji:
+```
+pred_x = cx + Δx
+pred_y = cy + Δy
+```
+
+Uzasadnienie: delty mają podobny rozkład w danych statycznych i dynamicznych (std ≈ 150–220 mm), co umożliwia generalizację sieci uczonej na danych statycznych na dane dynamiczne.
+
+---
+
+## Algorytm uczenia
+
+| Parametr | Wartość |
+|---|---|
+| Optymalizator | SGD z momentum |
+| Momentum | 0.9 |
+| Learning rate | 0.0005 |
+| Batch size | 32 |
+| Maks. epok | 400 |
+| Early stopping patience | 40 epok |
+| Inicjalizacja wag | He (`sqrt(2/n_in)`) |
+| Normalizacja X | StandardScaler |
+| Normalizacja Y (delt) | StandardScaler |
+| Podział danych | 70% trening / 30% walidacja |
+
+Early stopping przywraca wagi z epoki o najniższym błędzie walidacyjnym.
+
+---
+
+## Selekcja cech
+
+Program automatycznie wybiera cechy stabilne między danymi statycznymi a dynamicznymi. Dla każdej cechy obliczany jest **shift rozkładu**:
+
+```
+shift = |mean_dyn - mean_stat| / std_stat
+```
+
+Cechy z `shift > 1.0σ` są odrzucane — mają zbyt różny rozkład podczas treningu i testowania, co powoduje błędy predykcji.
+
+Przykład dla sali F8:
+```
+data__tagData__gyro__x       shift=0.22σ  ✓
+data__tagData__gyro__y       shift=0.01σ  ✓
+data__tagData__orientation__yaw  shift=0.29σ  ✓
+data__tagData__maxLinearAcceleration  shift=11.10σ  ✗ ODRZUCONO
+data__tagData__pressure      shift=3.15σ  ✗ ODRZUCONO
+```
+
+---
+
+## Mechanizm eliminacji outlierów
+
+Klasa `OutlierDetector` implementuje **podwójne kryterium** eliminacji błędnych pomiarów:
+
+1. **Mediana krocząca**: obliczana w oknie 15 próbek — eliminuje wpływ prawdziwego ruchu
+2. **Kryterium 1 (z-score)**: odległość od mediany > `2.5 × std`
+3. **Kryterium 2 (IQR)**: odległość od mediany > `Q3 + 1.5 × IQR`
+4. **Outlier** = spełnione **oba** kryteria jednocześnie
+5. Outlier zastępowany jest wartością mediany kroczącej (szereg zachowuje długość)
+
+Parametry wyznaczane są na danych **statycznych** (`fit`), następnie stosowane na obu zbiorach (`clean`).
+
+### Skuteczność mechanizmu
+
+Program trenuje **dwie sieci**:
+- **Sieć 1** — bez eliminacji outlierów (punkt odniesienia)
+- **Sieć 2** — z eliminacją outlierów
+
+Porównanie dystrybuant błędu obu sieci na wykresie `cdf_comparison.png` udowadnia skuteczność mechanizmu.
+
+---
+
+## Pliki wynikowe
+
+| Plik | Zawartość |
+|---|---|
+| `cdf_comparison.png` | Porównanie dystrybuant błędu (surowy / NN bez OD / NN z OD) |
+| `trajectory_*.png` | Trajektoria tagu: referencja vs UWB vs korekcja NN |
+| `error_vs_time.png` | Błąd w kolejnych próbkach |
+| `training_curve_*.png` | Krzywa uczenia (train/val MSE) |
+| `wagi_F8.xlsx` | Wagi wszystkich warstw sieci (z OD) |
+| `wyniki_F8.xlsx` | Predykcje: pred_x, pred_y, ref_x, ref_y, błąd [mm] |
+| `dystrybuanta_NN_F8.xlsx` | Dystrybuanta błędu po korekcji NN (wymóg zadania) |
+| `cdf_comparison_all.png` | Zbiorczy wykres F8 + F10 |
+
+---
+
+## Konfiguracja
+
+Wszystkie parametry znajdują się na początku pliku `uwb_nn_v4.py`:
+
+```python
+EPOCHS              = 400      # maks. liczba epok
+HIDDEN_LAYERS       = [256, 128, 64, 32]  # neurony w warstwach ukrytych
+LEARNING_RATE       = 0.0005   # współczynnik uczenia
+SEQUENCE_LEN        = 10       # długość okna czasowego
+BATCH_SIZE          = 32       # rozmiar batcha
+OUTLIER_THRESHOLD   = 2.5      # próg z-score dla OutlierDetector
+IQR_FACTOR          = 1.5      # mnożnik IQR dla OutlierDetector
+DROPOUT_RATE        = 0.1      # dropout w warstwach ukrytych
+EARLY_STOP_PATIENCE = 40       # epoki bez poprawy → stop
+MAX_FEATURE_SHIFT   = 1.0      # maks. shift cechy [σ] przy selekcji
+```
