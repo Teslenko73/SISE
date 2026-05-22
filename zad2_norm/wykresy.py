@@ -21,7 +21,6 @@ colors = ['#e74c3c', '#3498db']
 
 # ==========================================
 # 1. WYKRES PUDEŁKOWY (Boxplot)
-# ==========================================
 plt.figure(figsize=(8, 6))
 sns.boxplot(data=[err_raw, err_nn], palette=colors, width=0.5, fliersize=3)
 plt.xticks([0, 1], ['Surowy UWB', 'Po korekcji NN'], fontsize=12)
