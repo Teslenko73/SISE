@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 import os
 
-SALA = "F8" # zmienic na f8/f10
+SALA = "F10" # zmienic na f8/f10
 FILE_PATH = fr"C:\Users\user\PycharmProjects\SISE\zad2_norm\wyniki\{SALA}\5_Wyniki_{SALA}.xlsx"
 OUT_DIR = fr"C:\Users\user\PycharmProjects\SISE\zad2_norm\wyniki\{SALA}"
 
@@ -26,7 +26,7 @@ plt.xticks([0, 1], ['Surowy UWB', 'Po korekcji NN'], fontsize=12)
 plt.ylabel('Błąd euklidesowy [mm]', fontsize=12)
 plt.title(f'Rozkład błędów i wartości odstające (Boxplot) - {SALA}', fontsize=14)
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "boxplot_{SALA}.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, f"boxplot_{SALA}.png"), dpi=200)
 plt.close()
 
 # HISTOGRAM
@@ -39,7 +39,7 @@ plt.title(f'Histogram częstotliwości występowania błędu - {SALA}', fontsize
 plt.legend(fontsize=12)
 plt.xlim(0, np.percentile(err_raw, 99))
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "hist_{SALA}.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, f"hist_{SALA}.png"), dpi=200)
 plt.close()
 
 # LOGARYTMICZNA DYSTRYBUANTA
@@ -59,5 +59,5 @@ plt.title(f'Dystrybuanta błędu w skali logarytmicznej - {SALA}', fontsize=14)
 plt.legend(fontsize=12)
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "log_{SALA}.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, f"log_{SALA}.png"), dpi=200)
 plt.close()

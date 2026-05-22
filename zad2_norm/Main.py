@@ -195,7 +195,7 @@ def process_sala(sala):
     plt.ylabel("Prawdopodobieństwo")
     plt.grid(True, alpha=0.4)
     plt.legend()
-    plt.savefig(os.path.join(out_dir, "1_CDF_wykres.png"), dpi=150)
+    plt.savefig(os.path.join(out_dir, f"1_CDF_wykres_{sala}.png"), dpi=150)
     plt.close()
 
     # B) Krzywa uczenia
@@ -207,7 +207,7 @@ def process_sala(sala):
     plt.ylabel("Błąd MSE")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.savefig(os.path.join(out_dir, "2_Krzywa_uczenia.png"), dpi=150)
+    plt.savefig(os.path.join(out_dir, f"2_Krzywa_uczenia_{sala}.png"), dpi=150)
     plt.close()
 
     # C) Trajektoria: referencja vs UWB vs sieć
@@ -220,7 +220,7 @@ def process_sala(sala):
     plt.ylabel("Y [mm]")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.savefig(os.path.join(out_dir, "3_Trajektoria.png"), dpi=150)
+    plt.savefig(os.path.join(out_dir, f"3_Trajektoria_{sala}.png"), dpi=150)
     plt.close()
 
     # D) Błąd w czasie — widać gdzie sieć radzi sobie lepiej
@@ -233,7 +233,7 @@ def process_sala(sala):
     plt.ylabel("Błąd [mm]")
     plt.legend()
     plt.grid(True, alpha=0.3)
-    plt.savefig(os.path.join(out_dir, "4_Blad_w_czasie.png"), dpi=150)
+    plt.savefig(os.path.join(out_dir, f"4_Blad_w_czasie_{sala}.png"), dpi=150)
     plt.close()
 
     # E) Excel z posortowanymi błędami do raportu
