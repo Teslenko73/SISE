@@ -30,7 +30,6 @@ plt.savefig(os.path.join(OUT_DIR, "boxplot_{SALA}.png"), dpi=200)
 plt.close()
 
 # HISTOGRAM
-
 plt.figure(figsize=(10, 6))
 sns.histplot(err_raw, color=colors[0], label='Surowy UWB', kde=True, stat="density", linewidth=0, alpha=0.5)
 sns.histplot(err_nn, color=colors[1], label='Po korekcji NN', kde=True, stat="density", linewidth=0, alpha=0.5)
@@ -44,9 +43,7 @@ plt.savefig(os.path.join(OUT_DIR, "hist_{SALA}.png"), dpi=200)
 plt.close()
 
 # LOGARYTMICZNA DYSTRYBUANTA
-
 plt.figure(figsize=(10, 6))
-# Считаем CDF
 sort_raw = np.sort(err_raw)
 sort_nn = np.sort(err_nn)
 p_raw = np.arange(1, len(sort_raw) + 1) / len(sort_raw)
