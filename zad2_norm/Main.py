@@ -12,9 +12,7 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# ============================================================
 # KONFIGURACJA
-# ============================================================
 POMIARY_DIR = r"C:\Users\user\PycharmProjects\SISE\zad2_norm\pomiary"
 OUTPUT_DIR  = "./wyniki"
 WINDOW_SIZE = 5         # Sieć patrzy na 5 ostatnich próbek (przyspieszy działanie bez utraty trajektorii)
@@ -23,9 +21,7 @@ BATCH_SIZE  = 32
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ============================================================
 # 1. WCZYTYWANIE DANYCH I DETEKCJA KOLUMN
-# ============================================================
 def load_xlsx_files(data_dir, pattern):
     files = sorted(glob.glob(os.path.join(data_dir, pattern)))
     dfs = []
@@ -59,26 +55,18 @@ def get_common_features(df_stat, df_dyn, cx, cy, rx, ry):
     stat_num = set(df_stat.select_dtypes(include=[np.number]).columns)
     dyn_num  = set(df_dyn.select_dtypes(include=[np.number]).columns)
 
-    # Przecięcie zbiorów (tylko wspólne cechy)
     common = list(stat_num.intersection(dyn_num))
     features = [c for c in common if c.lower() not in META]
     return sorted(features)
 
-# ============================================================
 # 2. MECHANIZM NA OCENĘ 5 (Pre-processing: Filtr Medianowy)
-# ============================================================
 def remove_outliers(series, window=5, threshold=500):
-    """
-    Prosty, ale skuteczny filtr. Jeśli pomiar UWB skacze o więcej niż 'threshold' mm
-    wzgłędem lokalnej mediany, ucinamy go do mediany. Nie niszczy to dynamiki ruchu.
-    """
+
     rolling_med = series.rolling(window=window, center=True).median().bfill().ffill()
     diff = np.abs(series - rolling_med)
     return np.where(diff > threshold, rolling_med, series)
 
-# ============================================================
 # 3. TWORZENIE OKIEN CZASOWYCH (Time Steps dla sieci)
-# ============================================================
 def create_dataset(df, features, cx_col, cy_col, rx_col, ry_col, window_size):
     X, Y, raw_cx, raw_cy, ref_x, ref_y = [], [], [], [], [], []
 
@@ -89,16 +77,13 @@ def create_dataset(df, features, cx_col, cy_col, rx_col, ry_col, window_size):
     ry_data = df[ry_col].values
 
     for i in range(len(df) - window_size):
-        # Pobieramy cechy UWB z okna czasowego i spłaszczamy
         window_features = feat_data[i : i + window_size].flatten()
 
-        # Dodajemy też same surowe pozycje X i Y z okna do cech
         window_cx = cx_data[i : i + window_size]
         window_cy = cy_data[i : i + window_size]
 
         X.append(np.concatenate([window_features, window_cx, window_cy]))
 
-        # Target: o ile trzeba przesunąć OSTATNIĄ pozycję w oknie, by trafić w referencję (delta)
         current_cx = cx_data[i + window_size - 1]
         current_cy = cy_data[i + window_size - 1]
         target_rx = rx_data[i + window_size - 1]
@@ -106,7 +91,6 @@ def create_dataset(df, features, cx_col, cy_col, rx_col, ry_col, window_size):
 
         Y.append([target_rx - current_cx, target_ry - current_cy])
 
-        # Do wykresów
         raw_cx.append(current_cx)
         raw_cy.append(current_cy)
         ref_x.append(target_rx)
@@ -114,9 +98,7 @@ def create_dataset(df, features, cx_col, cy_col, rx_col, ry_col, window_size):
 
     return np.array(X), np.array(Y), np.array(raw_cx), np.array(raw_cy), np.array(ref_x), np.array(ref_y)
 
-# ============================================================
 # 4. GŁÓWNY POTOK (Dla wybranej Sali)
-# ============================================================
 def process_sala(sala):
     print(f"\n{'='*50}\nRozpoczynam analizę sali: {sala}\n{'='*50}")
     sala_dir = os.path.join(POMIARY_DIR, sala)
@@ -164,7 +146,7 @@ def process_sala(sala):
     model = Sequential([
         Input(shape=(X_train_sc.shape[1],)),
         Dense(128, activation='relu'),
-        Dropout(0.1), # Zapobiega overfittingowi
+        Dropout(0.1),
         Dense(64, activation='relu'),
         Dense(2, activation='linear') # Wyjście: Delta X, Delta Y
     ])
@@ -189,9 +171,7 @@ def process_sala(sala):
     print(f"Mediana błędu surowego: {np.median(err_surowy):.0f} mm")
     print(f"Mediana błędu po sieci: {np.median(err_siec):.0f} mm")
 
-    # ============================================================
     # 7. GENEROWANIE RAPORTÓW (Wykresy, Excel, Wagi)
-    # ============================================================
     print("-> Generowanie wykresów i plików do raportu...")
 
     # A) CDF Plot (Dystrybuanta)

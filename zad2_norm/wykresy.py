@@ -19,20 +19,18 @@ if np.mean(err_nn) > np.mean(err_raw):
 plt.style.use('seaborn-v0_8-whitegrid')
 colors = ['#e74c3c', '#3498db']
 
-# ==========================================
-# 1. WYKRES PUDEŁKOWY (Boxplot)
+# BOXPLOT
 plt.figure(figsize=(8, 6))
 sns.boxplot(data=[err_raw, err_nn], palette=colors, width=0.5, fliersize=3)
 plt.xticks([0, 1], ['Surowy UWB', 'Po korekcji NN'], fontsize=12)
 plt.ylabel('Błąd euklidesowy [mm]', fontsize=12)
 plt.title(f'Rozkład błędów i wartości odstające (Boxplot) - {SALA}', fontsize=14)
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "boxplot.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, "boxplot_{SALA}.png"), dpi=200)
 plt.close()
 
-# ==========================================
-# 2. HISTOGRAM NAKŁADAJĄCY SIĘ
-# ==========================================
+# HISTOGRAM
+
 plt.figure(figsize=(10, 6))
 sns.histplot(err_raw, color=colors[0], label='Surowy UWB', kde=True, stat="density", linewidth=0, alpha=0.5)
 sns.histplot(err_nn, color=colors[1], label='Po korekcji NN', kde=True, stat="density", linewidth=0, alpha=0.5)
@@ -42,12 +40,11 @@ plt.title(f'Histogram częstotliwości występowania błędu - {SALA}', fontsize
 plt.legend(fontsize=12)
 plt.xlim(0, np.percentile(err_raw, 99))
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "hist.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, "hist_{SALA}.png"), dpi=200)
 plt.close()
 
-# ==========================================
-# 3. LOGARYTMICZNA DYSTRYBUANTA (Prawdziwa!)
-# ==========================================
+# LOGARYTMICZNA DYSTRYBUANTA
+
 plt.figure(figsize=(10, 6))
 # Считаем CDF
 sort_raw = np.sort(err_raw)
@@ -65,6 +62,5 @@ plt.title(f'Dystrybuanta błędu w skali logarytmicznej - {SALA}', fontsize=14)
 plt.legend(fontsize=12)
 plt.grid(True, which="both", ls="--", alpha=0.5)
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, "log.png"), dpi=200)
+plt.savefig(os.path.join(OUT_DIR, "log_{SALA}.png"), dpi=200)
 plt.close()
-
